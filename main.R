@@ -1,0 +1,14 @@
+#this file will call all the function that you will need to run
+#the code for this internship.
+
+#the following function will download and load all the required packages for this project:
+#the function that you load in is called package_check and check if the packages are already downloaded
+#and otherwise downloads and loads them.
+source("r/load_packages.R")
+
+#the following part will get you the tile data for the requested country add save this data
+#in a created folder called data in you current directory.
+source("r/create_data_folder.R")
+
+#setup a virtual environment to run python scripts:
+source("r/create_virtual_environment.r")
