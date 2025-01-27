@@ -4,15 +4,16 @@ import numpy as np
 import rasterio
 import tensorflow as tf
 
-def stack_tifs_by_date(folder_path, date_pattern, desired_suffixes=None, normalization="min-max"):
+def stack_tifs_by_date(folder_path, date_pattern, tile_id, desired_suffixes=None, normalization="min-max"):
     """
-    Stacks and normalizes all TIFF files with a specific date pattern and desired suffixes from a folder,
+    Stacks and normalizes all TIFF files with a specific date pattern, tile ID, and desired suffixes from a folder,
     and directly converts them to a TensorFlow tensor with channel-last ordering.
 
     Args:
-        folder_path (str): Path to the folder containing the TIFF files.
+        folder_path (str): Path to the folder containing the TIFF files (without the tile ID).
         date_pattern (str): The date pattern (e.g., '2023-01-01') to filter the files.
-        desired_suffixes (list of str, optional): A list of desired suffixes (e.g., ['aridityannual', 'closenesstoroads']).
+        tile_id (str): The tile ID to specify the subdirectory or file naming convention (e.g., '00N_080W').
+        desired_suffixes (list of str, optional): A list of desired suffixes (e.g., ['confidence', 'temperature']).
             If None, all files matching the date pattern will be included.
         normalization (str): Normalization method ('min-max' or 'z-score').
 
@@ -21,8 +22,11 @@ def stack_tifs_by_date(folder_path, date_pattern, desired_suffixes=None, normali
             - tf.Tensor: A 4D tensor with shape (H, W, C) where C is the number of layers (TIFF files).
             - list: List of file names corresponding to each layer.
     """
+    # Construct the full folder path using the tile ID
+    full_folder_path = os.path.join(folder_path, tile_id)
+
     # Use glob to get all TIFF files with the specific date pattern
-    file_pattern = os.path.join(folder_path, f"*{date_pattern}*.tif")
+    file_pattern = os.path.join(full_folder_path, f"*{date_pattern}*.tif")
     tif_files = glob.glob(file_pattern)
 
     # Filter files by desired suffixes if provided
@@ -69,21 +73,14 @@ def stack_tifs_by_date(folder_path, date_pattern, desired_suffixes=None, normali
 
         # Convert the stacked raster to a TensorFlow tensor with channel-last ordering (H, W, C)
         input_tensor = tf.convert_to_tensor(stacked_rasters, dtype=tf.float32)
+        
+        # Add a batch dimension to the tensor (1, H, W, C)
+        input_tensor = tf.expand_dims(input_tensor, axis=0)
+        
     else:
         # Handle case where no files are found
         input_tensor = tf.constant([], dtype=tf.float32)
 
     return input_tensor, file_names
   
-folder_path = "data/preprocessed/input/00N_080W"
-date_pattern = "2022-01-01"
-monthly_datasets = ["confidence", "lastmonth", "lastsixmonths", "lastthreemonths",
-                      "patchdensity", "precipitation", "previoussameseason",
-                      "smoothedsixmonths", "smoothedtotal", "temperature", "timesinceloss",
-                      "nightlights", "totallossalerts"]
 
-input_image, file_names = stack_tifs_by_date(folder_path, date_pattern, desired_suffixes=monthly_datasets)
-
-# Ensure input tensor has shape (batch_size, height, width, channels)
-input_image = tf.expand_dims(input_image, axis=0)  # Add batch dimension, now shape is (1, 2500, 2500, 13)
-print(input_image.shape)  # Check the shape of the input image with batch dimension
