@@ -22,11 +22,17 @@ from extract_features import extract_and_save_features
 from resunet import ResUNet
 from prepare_input_data import prepare_input_data
 from add_batch_dimension import add_batch_dimension
+from weighted_loss_function import weighted_binary_crossentropy
+from F05_loss_function import weighted_f05_loss
+from utils import get_completed_runs, log_completed_runs, load_completed_runs_from_log
+from train_and_save_models import train_and_save_models
+from resunet import ResUNet
+from extract_features import extract_and_save_features
 
 #run the functions
 if __name__ == "__main__":
   
-    # Global constants
+    #GLOBAL VARIABLES
     TILE_ID = "00N_080W"
     DATA_FOLDER_PATH_INPUT = "data/preprocessed/input"
     DATE_PATTERN_INPUT = "2022-01-01"
@@ -36,35 +42,39 @@ if __name__ == "__main__":
     "confidence", "lastmonth", "lastsixmonths", "lastthreemonths",
     "patchdensity", "precipitation", "previoussameseason",
     "smoothedsixmonths", "smoothedtotal", "temperature", "timesinceloss",
-    "nightlights", "totallossalerts"
-    ]
+    "nightlights", "totallossalerts"]
+    GROUNDTRUTH_IMAGE_PATH = "data/preprocess/groundtruth/00N_080W/00N_080W_2022_06_01_groundtruth6m.tif"
+    OUTPUT_DIR_IMAGES = "C:/internship2/output/"
+    
+    #PARAMETERS FOR TRAINING
+    EPOCHS_LIST = [10, 30]
+    LOSS_FUNCTIONS = { 
+      "weighted_binary_crossentropy" : weighted_binary_crossentropy,
+      "weighted_f05_loss" : weighted_f05_loss}
+    GROUNDTRUTH_WEIGHTS = [1.0, 2.0, 5.0]
+    OUTPUT_DIR_MODELS = "C:/models/automated_training/"
+    
   
-    # Call the main processing logic
-    input_image, file_names = stack_tifs_by_date(DATA_FOLDER_PATH_INPUT, DATE_PATTERN_INPUT, TILE_ID, MONTHLY_DATASETS)
-    input_image = add_batch_dimension(input_image)
-    groundtruth_image = add_batch_dimension(preprocess_groundtruth(DATA_FOLDER_PATH_GROUNDTRUTH, DATE_PATTERN_GROUNDTRUTH, TILE_ID))
+    # Call the main processing logic for defining the input image and the groundtruth image for single image training
+    input_image, file_names = stack_tifs_by_date(DATA_FOLDER_PATH_INPUT, DATE_PATTERN_INPUT, TILE_ID, MONTHLY_DATASETS) #stack the tiff files
+    print(input_image.shape)
+    groundtruth_image = add_batch_dimension(preprocess_groundtruth(DATA_FOLDER_PATH_GROUNDTRUTH, DATE_PATTERN_GROUNDTRUTH, TILE_ID)) #process GT and add batch dimension
+    print(groundtruth_image.shape)
+    
+    # Completed runs
+    completed_runs = get_completed_runs(OUTPUT_DIR_MODELS)
+    log_file_path = os.path.join(OUTPUT_DIR_MODELS, "completed_runs.log")
+    log_completed_runs(log_file_path, completed_runs)
+
+    # Train models
+    train_and_save_models(OUTPUT_DIR_MODELS, EPOCHS_LIST, LOSS_FUNCTIONS, GROUNDTRUTH_WEIGHTS, input_image, groundtruth_image)
+    
+    #load models, extract features and save them.
+    extract_and_save_features(OUTPUT_DIR_MODELS, input_image, OUTPUT_DIR_IMAGES, GROUNDTRUTH_IMAGE_PATH)
+    
+    
 
 
-
-# def weighted_binary_crossentropy(y_true, y_pred, weight_1=2.5):
-#     """
-#     Weighted binary crossentropy loss function.
-# 
-#     Parameters:
-#     - y_true: Ground truth values.
-#     - y_pred: Predicted values.
-#     - weight_1: Weight for the positive class (1).
-# 
-#     Returns:
-#     - Weighted binary crossentropy loss.
-#     """
-#     epsilon = K.epsilon()
-#     y_pred = K.clip(y_pred, epsilon, 1 - epsilon)
-#     # Compute binary crossentropy
-#     bce = - (y_true * K.log(y_pred) + (1 - y_true) * K.log(1 - y_pred))
-#     # Apply weights
-#     weighted_bce = bce * (y_true * weight_1 + (1 - y_true))
-#     return K.mean(weighted_bce)
 
   
 #input_layer = Input(shape=(2500, 2500, 13))  # Define the input layer

@@ -14,5 +14,4 @@ source("r/create_data_folder.R")
 source("r/create_virtual_environment.r")
 
 #all python files will be called from within the main python file to hopefully speed up processing time.
-
 source_python("python/run.py")
