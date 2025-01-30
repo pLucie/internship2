@@ -26,7 +26,7 @@ def train_and_save_models(output_dir, epochs_list, loss_functions, ground_truth_
                 input_layer = Input(shape=(2500, 2500, 13))
                 resunet_features = ResUNet(input_layer)
                 feature_output = Conv2D(5, (1, 1), activation='linear', name='feature_output')(resunet_features)
-                classification_output = Conv2D(1, (1, 1), activation='sigmoid', name='classification_output')(resunet_features)
+                classification_output = Conv2D(1, (1, 1), activation='sigmoid', name='classification_output')(feature_output)
                 model = Model(inputs=input_layer, outputs=[feature_output, classification_output])
 
                 # Compile model
