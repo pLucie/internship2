@@ -31,20 +31,29 @@ from extract_features import extract_and_save_features
 
 #run the functions
 if __name__ == "__main__":
+
+    # Ensure paths are handled correctly
+    BASE_DIR = os.path.abspath("C:/internship2/")  # Set this to your project root
+    TILE_ID = "00N_080W"
+    DATA_FOLDER_PATH_INPUT = os.path.join(BASE_DIR, "data", "preprocessed", "input")
+    DATA_FOLDER_PATH_GROUNDTRUTH = os.path.join(BASE_DIR, "data", "preprocessed", "groundtruth")
+    GROUNDTRUTH_IMAGE_PATH = os.path.join(DATA_FOLDER_PATH_GROUNDTRUTH, TILE_ID,
+                                          f"{TILE_ID}_2022-06-01_groundtruth6m.tif")
+    OUTPUT_DIR_IMAGES = os.path.join(BASE_DIR, "output")
   
     #GLOBAL VARIABLES
-    TILE_ID = "00N_080W"
-    DATA_FOLDER_PATH_INPUT = "data/preprocessed/input"
+    #TILE_ID = "00N_080W"
+    #DATA_FOLDER_PATH_INPUT = "data/preprocessed/input"
     DATE_PATTERN_INPUT = "2022-01-01"
-    DATA_FOLDER_PATH_GROUNDTRUTH = "data/preprocessed/groundtruth"
+    #DATA_FOLDER_PATH_GROUNDTRUTH = "data/preprocessed/groundtruth"
     DATE_PATTERN_GROUNDTRUTH = "2022-06-01"
     MONTHLY_DATASETS = [
     "confidence", "lastmonth", "lastsixmonths", "lastthreemonths",
     "patchdensity", "precipitation", "previoussameseason",
     "smoothedsixmonths", "smoothedtotal", "temperature", "timesinceloss",
     "nightlights", "totallossalerts"]
-    GROUNDTRUTH_IMAGE_PATH = "data/preprocess/groundtruth/00N_080W/00N_080W_2022_06_01_groundtruth6m.tif"
-    OUTPUT_DIR_IMAGES = "C:/internship2/output/"
+    #GROUNDTRUTH_IMAGE_PATH = "data/preprocess/groundtruth/00N_080W/00N_080W_2022_06_01_groundtruth6m.tif"
+    #OUTPUT_DIR_IMAGES = "C:/internship2/output/"
     
     #PARAMETERS FOR TRAINING
     EPOCHS_LIST = [10, 30]

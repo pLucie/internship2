@@ -2,9 +2,10 @@ import tensorflow.keras.backend as K
 import tensorflow as tf
 
 def weighted_f05_loss(y_true, y_pred, weight_1=2.0):
+    #obtain a small value
     epsilon = tf.keras.backend.epsilon()
 
-    # Clip predictions to avoid log(0) errors
+    # Clip predictions to avoid mathematical errors by dividing by zero.
     y_pred = tf.clip_by_value(y_pred, epsilon, 1.0 - epsilon)
 
     # Calculate precision and recall

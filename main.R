@@ -15,3 +15,6 @@ source("r/create_virtual_environment.r")
 
 #all python files will be called from within the main python file to hopefully speed up processing time.
 source_python("python/run.py")
+
+#next step is to use the forest foresight package to make predictions with the extracted features combined with the original features.
+#make sure to make the prediction for after
