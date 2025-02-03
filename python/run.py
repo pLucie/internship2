@@ -14,7 +14,7 @@ from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, concaten
 from tensorflow.keras import Model, Input
 from keras.models import load_model
 
-#load user defined functions
+# load user defined functions
 from stack_tifs_by_date_tensorflow import stack_tifs_by_date
 from preprocess_groundtruth_tensorflow import preprocess_groundtruth
 from save_as import save_as_tiff
@@ -29,7 +29,7 @@ from train_and_save_models import train_and_save_models
 from resunet import ResUNet
 from extract_features import extract_and_save_features
 
-#run the functions
+# run the functions
 if __name__ == "__main__":
 
     # Ensure paths are handled correctly
@@ -41,33 +41,27 @@ if __name__ == "__main__":
                                           f"{TILE_ID}_2022-06-01_groundtruth6m.tif")
     OUTPUT_DIR_IMAGES = os.path.join(BASE_DIR, "output")
   
-    #GLOBAL VARIABLES
-    #TILE_ID = "00N_080W"
-    #DATA_FOLDER_PATH_INPUT = "data/preprocessed/input"
+    # GLOBAL VARIABLES
     DATE_PATTERN_INPUT = "2022-01-01"
-    #DATA_FOLDER_PATH_GROUNDTRUTH = "data/preprocessed/groundtruth"
     DATE_PATTERN_GROUNDTRUTH = "2022-06-01"
     MONTHLY_DATASETS = [
-    "confidence", "lastmonth", "lastsixmonths", "lastthreemonths",
-    "patchdensity", "precipitation", "previoussameseason",
-    "smoothedsixmonths", "smoothedtotal", "temperature", "timesinceloss",
-    "nightlights", "totallossalerts"]
-    #GROUNDTRUTH_IMAGE_PATH = "data/preprocess/groundtruth/00N_080W/00N_080W_2022_06_01_groundtruth6m.tif"
-    #OUTPUT_DIR_IMAGES = "C:/internship2/output/"
+        "confidence", "lastmonth", "lastsixmonths", "lastthreemonths",
+        "patchdensity", "precipitation", "previoussameseason",
+        "smoothedsixmonths", "smoothedtotal", "temperature", "timesinceloss",
+        "nightlights", "totallossalerts"]
     
-    #PARAMETERS FOR TRAINING
+    # PARAMETERS FOR TRAINING
     EPOCHS_LIST = [10, 30]
     LOSS_FUNCTIONS = { 
-      "weighted_binary_crossentropy" : weighted_binary_crossentropy,
-      "weighted_f05_loss" : weighted_f05_loss}
+      "weighted_binary_crossentropy": weighted_binary_crossentropy,
+      "weighted_f05_loss": weighted_f05_loss}
     GROUNDTRUTH_WEIGHTS = [1.0, 2.0, 5.0]
     OUTPUT_DIR_MODELS = "C:/models/automated_training/"
-    
-  
+
     # Call the main processing logic for defining the input image and the groundtruth image for single image training
-    input_image, file_names = stack_tifs_by_date(DATA_FOLDER_PATH_INPUT, DATE_PATTERN_INPUT, TILE_ID, MONTHLY_DATASETS) #stack the tiff files
+    input_image, file_names = stack_tifs_by_date(DATA_FOLDER_PATH_INPUT, DATE_PATTERN_INPUT, TILE_ID, MONTHLY_DATASETS)
     print(input_image.shape)
-    groundtruth_image = add_batch_dimension(preprocess_groundtruth(DATA_FOLDER_PATH_GROUNDTRUTH, DATE_PATTERN_GROUNDTRUTH, TILE_ID)) #process GT and add batch dimension
+    groundtruth_image = add_batch_dimension(preprocess_groundtruth(DATA_FOLDER_PATH_GROUNDTRUTH, DATE_PATTERN_GROUNDTRUTH, TILE_ID))
     print(groundtruth_image.shape)
     
     # Completed runs
@@ -77,32 +71,10 @@ if __name__ == "__main__":
 
     # Train models
     train_and_save_models(OUTPUT_DIR_MODELS, EPOCHS_LIST, LOSS_FUNCTIONS, GROUNDTRUTH_WEIGHTS, input_image, groundtruth_image)
-    
-    #load models, extract features and save them.
+
+    # define the parameters for feature extraction (change the input image to a year later)
+    DATE_PATTERN_INPUT = "2023-01-01"   # use a later date to extract the features from and test the outputs of this.
+    input_image = stack_tifs_by_date(DATA_FOLDER_PATH_INPUT, DATE_PATTERN_INPUT, TILE_ID, MONTHLY_DATASETS)
+
+    # load models, extract features and save them.
     extract_and_save_features(OUTPUT_DIR_MODELS, input_image, OUTPUT_DIR_IMAGES, GROUNDTRUTH_IMAGE_PATH)
-    
-    
-
-
-
-  
-#input_layer = Input(shape=(2500, 2500, 13))  # Define the input layer
-#resunet_features = ResUNet(input_layer)
-
-# Feature extractor output: 5 feature maps
-#feature_output = Conv2D(5, (1, 1), activation='linear', name='feature_output')(resunet_features)
-
-# Ground truth classification output: 1 binary map
-#classification_output = Conv2D(1, (1, 1), activation='sigmoid', name='classification_output')(resunet_features)
-
-# Define the model
-#model = Model(inputs=input_layer, outputs=[feature_output, classification_output])
-
-# model.compile(optimizer='adam',
-#               loss={'feature_output': None,  # No loss for feature output
-#                     'classification_output':
-#                         lambda y_true, y_pred: weighted_binary_crossentropy(y_true, y_pred, weight_1=2.0)},
-#               loss_weights={'feature_output': 0.0,  # Do not focus on feature extraction
-#                             'classification_output': 1.0})
-# 
-
