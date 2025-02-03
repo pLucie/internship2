@@ -49,49 +49,6 @@ from save_as import save_as_tiff
 #         save_as_tiff(feature_map, feature_map_output_path, groundtruth_image_path)
 #         print(f"Feature map for {model_file} saved successfully in {model_output_folder}!")
 
-import os
-import numpy as np
-import tensorflow as tf
-from tensorflow.keras.models import load_model
-
-# def extract_and_save_features(models_folder, input_image, output_folder, groundtruth_image_path):
-#     os.makedirs(output_folder, exist_ok=True)
-#
-#     model_files = [f for f in os.listdir(models_folder) if f.endswith('.h5') and 'weights' not in f]
-#     print(f"Found {len(model_files)} models: {model_files}")
-#
-#     input_tensor = tf.convert_to_tensor(input_image, dtype=tf.float32)  # Convert input to tensor once
-#
-#     for model_file in model_files:
-#         model_name = os.path.splitext(model_file)[0]
-#         model_output_folder = os.path.join(output_folder, model_name)
-#         os.makedirs(model_output_folder, exist_ok=True)
-#
-#         feature_map_output_path = os.path.join(model_output_folder, f'{model_name}_feature_map.tif')
-#
-#         if os.path.exists(feature_map_output_path):
-#             print(f"Feature map for {model_file} already exists, skipping...")
-#             continue
-#
-#         print(f"Loading model: {model_file}")
-#         model_path = os.path.join(models_folder, model_file)
-#         model = load_model(model_path, compile=False)
-#         print(f"Model {model_file} loaded successfully!")
-#
-#         # Optimize inference using TensorFlow graph execution
-#         model_fn = tf.function(model)
-#
-#         print(f"Extracting features for {model_file}...")
-#         feature_map = model_fn(input_tensor, training=False)  # Faster inference
-#
-#         if isinstance(feature_map, list):
-#             feature_map = feature_map[0]
-#
-#         feature_map = np.array(feature_map)  # Ensure NumPy array
-#
-#         save_as_tiff(feature_map, feature_map_output_path, groundtruth_image_path)
-#         print(f"Feature map for {model_file} saved successfully!")
-
 # import os
 # import numpy as np
 # import tensorflow as tf
