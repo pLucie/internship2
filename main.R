@@ -18,3 +18,6 @@ source_python("python/run.py")
 
 #next step is to use the forest foresight package to make predictions with the extracted features combined with the original features.
 #make sure to make the prediction for after
+# after running run.py you will get all the models and different outputs for each model settings. we will now start testing which setting yields the best results.
+# first make a function to rename the current files to the forest foresight structure. which is the following:{TILE_ID}_{DATE}_{FEATURE}.tif
+source("r/rename_tif_files.R")
