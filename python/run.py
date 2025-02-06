@@ -28,6 +28,7 @@ from utils import get_completed_runs, log_completed_runs, load_completed_runs_fr
 from train_and_save_models import train_and_save_models
 from resunet import ResUNet
 from extract_features import extract_and_save_features
+from feature_extraction import process_with_model
 
 # run the functions
 if __name__ == "__main__":
@@ -72,9 +73,29 @@ if __name__ == "__main__":
     # Train models
     train_and_save_models(OUTPUT_DIR_MODELS, EPOCHS_LIST, LOSS_FUNCTIONS, GROUNDTRUTH_WEIGHTS, input_image, groundtruth_image)
 
-    # define the parameters for feature extraction (change the input image to a year later)
-    DATE_PATTERN_INPUT = "2023-01-01"   # use a later date to extract the features from and test the outputs of this.
-    input_image = stack_tifs_by_date(DATA_FOLDER_PATH_INPUT, DATE_PATTERN_INPUT, TILE_ID, MONTHLY_DATASETS)
+    # # define the parameters for feature extraction (change the input image to a year later)
+    # DATE_PATTERN_INPUT = "2023-01-01"   # use a later date to extract the features from and test the outputs of this.
+    # input_image = stack_tifs_by_date(DATA_FOLDER_PATH_INPUT, DATE_PATTERN_INPUT, TILE_ID, MONTHLY_DATASETS)
+    
+    # parameters for extraction to determine best performing model.
+    MODEL_DIR = "C:/models/automated_training/"
+    DATA_FOLDER_PATH_INPUT = os.path.join(BASE_DIR, "data", "preprocessed", "input", TILE_ID)
+    OUTPUT_DIR_IMAGES = os.path.join(BASE_DIR, "output")
+    GROUNDTRUTH_IMAGE_PATH = os.path.join(DATA_FOLDER_PATH_GROUNDTRUTH, TILE_ID,
+                                          f"{TILE_ID}_2022-06-01_groundtruth6m.tif")
+    DATES_TO_PROCESS = ["2023-01-01", "2023-02-01", "2023-03-01", "2023-04-01", "2023-05-01", "2023-06-01", "2023-07-01", "2023-08-01"
+                                    , "2023-09-01", "2023-10-01", "2023-11-01", "2023-12-01"]                                      
+    MODEL_FILES = [f for f in os.listdir(MODEL_DIR) if f.endswith(".h5") and not f.endswith("weights.h5")]
+    
+    # # load models, extract features and save them.
+    # extract_and_save_features(OUTPUT_DIR_MODELS, input_image, OUTPUT_DIR_IMAGES, GROUNDTRUTH_IMAGE_PATH)
 
-    # load models, extract features and save them.
-    extract_and_save_features(OUTPUT_DIR_MODELS, input_image, OUTPUT_DIR_IMAGES, GROUNDTRUTH_IMAGE_PATH)
+    # Get all model files in directory, excluding those ending with "weights.h5"
+    model_files = [f for f in os.listdir(MODEL_DIR) if f.endswith(".h5") and not f.endswith("weights.h5")]
+
+    for model_file in model_files:
+        model_path = os.path.join(MODEL_DIR, model_file)
+        process_with_model(model_path, OUTPUT_DIR_IMAGES, DATA_FOLDER_PATH_INPUT, GROUNDTRUTH_IMAGE_PATH,
+                           DATES_TO_PROCESS, TILE_ID, MONTHLY_DATASETS)
+
+    print("All models processed successfully!")
